@@ -1,0 +1,24 @@
+Print the names of all deployments in the admin2406 namespace in the following format:
+
+DEPLOYMENT CONTAINER_IMAGE READY_REPLICAS NAMESPACE
+
+<deployment name> <container image used> <ready replica count> <Namespace>
+. The data should be sorted by the increasing order of the deployment name.
+
+
+Example:
+
+DEPLOYMENT CONTAINER_IMAGE READY_REPLICAS NAMESPACE
+deploy0 nginx:alpine 1 admin2406
+Write the result to the file /opt/admin2406_data.
+
+
+kubectl get deployments -n admin2406 -o=jsonpath='{range .items[*]}{.metadata.name} {.spec.template.spec.containers[*].image} {.status.readyReplicas} {.metadata.namespace}{"\n"}{end}' | sort | awk '{$1=$1};1' > /opt/admin2406_data
+
+output:
+
+deploy1 nginx 1 admin2406
+deploy2 nginx:alpine 1 admin2406
+deploy3 nginx:1.16 1 admin2406
+deploy4 nginx:1.17 1 admin2406
+deploy5 nginx:latest 1 admin2406

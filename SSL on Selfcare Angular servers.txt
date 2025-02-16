@@ -1,0 +1,7 @@
+
+
+1. copy the .crt and .key file to /etc/ssl
+
+2. change the ssl location in /etc/nginx/ngin.conf file
+
+3.restart the nginx service

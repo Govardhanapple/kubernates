@@ -1,0 +1,14 @@
+To check validity
+
+kubeadm certs check-expiration
+
+To renew the certs manually
+
+kubeadm certs renew all
+
+After that copy the admin.conf to config file to use the updated certificates
+
+cp /etc/kubernetes/admin.conf /home/engteam/.kube/config
+
+You must restart the kube-apiserver, kube-controller-manager, kube-scheduler and etcd.
+

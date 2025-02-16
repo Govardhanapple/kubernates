@@ -1,0 +1,17 @@
+journalctl -u kubelet | grep -i cert
+
+openssl x509 -in kubelet.crt -text -noout
+
+cd /etc/systemd/system/kubelet.service.d/
+
+vi 10-kubeadm.conf
+
+Environment="KUBELET_EXTRA_ARGS=--rotate-certificates=true --rotate-server-certificates=true --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+
+systemctl daemon-reload
+
+service kubelet restart
+
+kubectl certificate approve
+
+openssl x509 -in kubelet-server-2024-02-12-17-19-18.pem -text -noout

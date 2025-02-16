@@ -1,0 +1,31 @@
+After Certificates Expired. We can follow below Steps to rebuild the cluster
+
+kubeadm certs renew all
+
+Copy the /etc/kubernetes/admin.conf file to user Home directory /.kube/config
+
+Delete the all static Pods. Static pods will be crashloopback off state they will not regenerate
+
+Check the below process id and kill them
+
+netstat -tulpn | grep kubelet
+
+Shows the kubelet process id
+
+kill the process. (kill -9 id)
+
+Restart the kublet
+
+Service restart kubelet
+
+same for etcd , controller manager , weave delete all running process and restart the kubelet
+
+After deleting all the process id. restart the kubelet cluster will be in ready state
+
+------------------------------------------------------------------------------------------------------------------
+
+if we clone any server from one Hardware to another which is in cluster. We must disable the swap. otherwise cluster won't work
+
+-------------------------------------------------------------------------------------------------------------------
+
+

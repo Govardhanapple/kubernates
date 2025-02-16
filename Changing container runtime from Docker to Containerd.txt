@@ -1,0 +1,218 @@
+Container rutime interface change from docker to containerd.
+
+First we will change it on all worker nodes then all master nodes
+
+1.First cordon the node
+
+kubectl cordon (node name)
+
+2. drain the  node
+
+kubectl drain (node name) --ignore-daemonsets
+
+3. check which docker with docker ps 
+
+4. check which ctr
+
+   ctr namespace list
+
+5. ctr --namespace moby container list (both containers are same)
+
+6. systemctl stop kubelet
+
+7. systemctl stop docker
+
+8 vi /etc/containerd/config.toml
+
+Comment the line disabled plugin
+
+9. systemctl restart containerd
+
+10.systemctl status containerd
+
+11. vi /var/lib/kubelet/kubeadm-flags.env
+
+it will be like this
+
+KUBELET_KUBEADM_ARGS="--network-plugin=cni --pod-infra-container-image=k8s.gcr.io/pause:3.6"
+
+Edit this as
+
+KUBELET_KUBEADM_ARGS="--network-plugin=cni --pod-infra-container-image=k8s.gcr.io/pause:3.6 --container-runtime=remote --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
+
+12.containerd config default | sudo tee /etc/containerd/config.toml
+
+vi /etc/containerd/config.toml
+
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."10.100.104.94:8080"]
+          endpoint = ["http://10.100.104.94:8080"]
+        [plugin."io.containerd.grpc.v1.cri".registry.mirrors."10.100.104.94:8080"]
+
+
+12. systemctl start kubelet
+
+13. systemctl start docker
+
+14.kubectl edit no <node-name>
+
+Change the value of kubeadm.alpha.kubernetes.io/cri-socket from /var/run/dockershim.sock to the CRI socket path unix:///run/containerd/containerd.sock
+
+15.kubectl uncordon (node name)
+
+Now we will see it as cri containerd 
+
+Revert Back steps:
+
+1.cordon the node
+2.drain the node
+3.stop the kubelet ,containerd and docker
+4.change the kubeadm-flags.env as default
+5.uncomment the disabled plugin line in config.toml file
+6.restart the containerd and docker
+7. check the status of nodes
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Additional steps followed
+
+----------------------------------------------------------------------------------
+
+{
+    "exec-opts": ["native.cgroupdriver=systemd"],
+    "insecure-registries": ["x.x.x.x:8080"]
+}
+-------------------------------------------------------------------------
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+  SystemdCgroup = true
+
+[plugins."io.containerd.grpc.v1.cri".containerd]
+  [plugins."io.containerd.grpc.v1.cri".containerd.untrusted_workload_runtime]
+    [plugins."io.containerd.grpc.v1.cri".containerd.untrusted_workload_runtime.runtimes.runc.options]
+      SystemdCgroup = true
+
+[plugins."io.containerd.grpc.v1.cri".registry]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."x.x.x.x:8080"]
+      endpoint = ["http://x.x.x.x:8080"]
+------------------------------------------------------------------------------------
+vi /etc/containerd/config.toml
+	  
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+  ...
+  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+    SystemdCgroup = true
+	
+[plugins."io.containerd.grpc.v1.cri".registry]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+    ["x.x.x.x:8080"] = [
+      "insecure"
+    ]
+
+-----------------------------------------------------------------
+ctr -n k8s.io images pull registry.example.com/image:tag
+ctr -n k8s.io images push registry.example.com/image:tag
+tail -f /var/log/containerd/containerd.log
+--------------------------------------------------------------------
+
+ctr -n k8s.io images auth login 172.23.21.36:8080
+
+172.23.21.36:8080	 
+
+Harbor12345 admin
+
+crictl login --registry=172.23.21.36:8080 --username=admin --password=Harbor12345
+
+--------------------------------
+
+ctr image pull x.x.x.x:8080/library/ubuntu:latest
+
+
+$ cat /etc/crictl.yaml
+runtime-endpoint: unix:///run/containerd/containerd.sock
+image-endpoint: unix:///run/containerd/containerd.sock
+timeout: 10
+debug: true
+
+$ sudo nerdctl --containerd-socket unix:///run/containerd/containerd.sock
+
+
+[plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."10.100.112.93:8080"]
+    endpoint = ["http://10.100.112.93:8080"]
+    username = "your-username"
+    password = "your-password"
+
+
+kubectl create secret docker-registry <secret-name> --docker-server=<registry-url> --docker-username=<your-username> --docker-password=<your-password>
+
+
+------------------------------------------------------------------------------------------
+nerdctl installation
+
+https://github.com/containerd/nerdctl/releases/
+
+download tar file from there
+
+unzip to
+tar -xzf nerdctl-1.4.0-linux-amd64.tar.gz -C /usr/local/bin
+export PATH=$PATH:/usr/local/bin/
+source ~/.bashrc
+
+nerdctl --version
+
+nerdctl login
+
+-----------------------------------------------------------------------------------------------------
+
+Working config
+
+
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+  runtime_type = "io.containerd.runc.v2"
+[plugins."io.containerd.grpc.v1.cri".containerd]
+  [plugins."io.containerd.grpc.v1.cri".containerd.untrusted_workload_runtime]
+    [plugins."io.containerd.grpc.v1.cri".containerd.untrusted_workload_runtime.runtimes.runc.options]
+      SystemdCgroup = true
+
+[plugins."io.containerd.grpc.v1.cri".registry]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."10.100.104.206:8080"]
+      endpoint = ["http://10.100.104.206:8080"]
+-------------------------------------------------------------------------------------------------------
+
+docker pull registry.k8s.io/pause:3.9
+
+10.100.104.206:8080/act_uat/selfcare/selfcare-otp-service 
+
+docker save 10.100.104.206:8080/act_uat/selfcare/selfcare-otp-service  -o selfcare-otp.tar
+
+
+sudo ctr -n=k8s.io images import selfcare-otp.tar
+
+
+docker push 10.100.104.206:8080/act_uat/selfcare/selfcare-otp-service:0.1
+
+--------------------------------------------------------------------------------------------------
+
+ls -l /run/containerd/containerd.sock
+```
+Chmod 777 /run/containerd/containerd.sock
+
+chown -R engteam:engteam /run/containerd/containerd.sock
+
+vi /etc/containerd/config.toml
+
+
+
+ctr image pull --plain-http=true 10.100.104.94:8080/act_dev/selfcare/selfcare-popup@sha256:6ed80b1206935dfd3d14c1a20145904f40eeb3571b78cb499cd5ca3f4f52dcae
+----------------------------------------------------------------------------------------------------------
+containerd config default | sudo tee /etc/containerd/config.toml
+
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."10.100.104.94:8080"]
+          endpoint = ["http://10.100.104.94:8080"]
+        [plugin."io.containerd.grpc.v1.cri".registry.mirrors."10.100.104.94:8080"]

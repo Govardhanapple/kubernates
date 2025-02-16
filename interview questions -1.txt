@@ -1,0 +1,52 @@
+1. What is Kubernetes
+
+Kubernets is a container orchestration tool that is used for automating the tasks of managing, monitering,scaling, and 
+deploying containerized applications, it creates group of containers that can be logically discovered and managed for easy operations on containers
+
+
+2.what is difference between kubernetes and docker swarm
+
+Docker swarm is a default container orchestaration tool that comes with docker. Docker Swarm can only orchestrate simple docker containers. Kubernnetes, on the other hand, helps manage much more complex software application containers. kubernetes offers support for larger demand production environment
+
+Dokcer swarm cant do auto scaling
+Docker swarm doesnt have a GUI
+Docker can deploy rolling updates but cant deploy automatic rollbacks
+Docker requires third-party tools like ELK stack for logging and monitering
+DOcker swarm can share storage volume with any containers easily. but kubernetes can only share storage volumes with containers in the same pod
+
+3. what is Heapster
+
+Heapster lets us do the container cluster monitering and even data aggregation. it has native support for kubernetes
+
+4. What is kubelet
+
+the kubelet is a service agent that controls and maintains a set of pods by watching for pod specs through the kubernetes api servers. 
+it preservers the pod lifecycle by ensuring that a given set of containers are all running as they should. 
+The kubelet runs on each node and enables the communication between master and slave nodes
+
+5. what is kubectl
+
+kubectl is a kubernetes command line tool that os used for deploying and managing applications on kubernetes. kubectl is especially useful for inspecting the cluster resources, and for creating updating and deleting the components
+
+6. what are different types of kubernets services
+
+* Cluster ip
+* Node Port
+* Load Balances
+* Extenal Name
+
+7 How to set a static ip for kubernetes load balancer
+
+Kubernetes master assign a new ip address
+
+we can set a static ip for kubernets load balancer by changing the DNS Records whenever kubernetes master assigns a new ip address
+
+8. What is etcd
+
+kubernetes uses etcd as a distributed key-value store for all of its data, including metadata and configuration data, and allows nodes in kubernets cluster to read and write data. Etcd represents the state of a cluster at a specific moment in time and is a center for state management and cluster coordination of a kubernetes cluster
+
+9. Can we use many claims out of a persistent volume
+
+The mapping between the persistentvolume and persistentvolumeclaim is always one to one. EVen when we delete the claim. Persistent volume still remains as we set persistentvolumrreclaim policy is set to retain and it will not reused by any other claims
+
+10. How do 

@@ -1,0 +1,6 @@
+kubectl apply -f svc-selfcare-popup.yaml -n selfcare
+kubectl apply -f deploy-selfcare-popup.yaml -n selfcare
+kubectl create configmap -n selfcare  configmap-selfcare-application-yaml --from-file=/app/selfcare/conf/application.yml
+kubectl create configmap -n selfcare  configmap-selfcare-application-bill-comm-yaml --from-file=/app/selfcare/conf/application_bill_communication.yml
+kubectl create configmap -n selfcare  configmap-selfcare-application-payment-yaml  --from-file=/app/selfcare/conf/application-payment.yml
+kubectl create configmap -n selfcare  configmap-selfcare-db-config-cdr  --from-file=/app/selfcare/conf/db-config-cdr.yml

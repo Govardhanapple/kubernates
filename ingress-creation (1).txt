@@ -1,0 +1,48 @@
+1.First we need to create a tls secret
+
+2.cd /app/k8s/ingress/ssl2023-24_new/
+
+kubectl create secret tls new-corpsite-ingress-tls --namespace corpsite --key ACT_2024.key --cert bundle.crt
+
+3.create ingress resource using the tls secret and below yaml file
+
+cd /app/corpsite/prod-corpsite/news-corpsite
+
+vi new-corpsite-ingress.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    ingress.kubernetes.io/proxy-body-size: "600m" #FILE SIZE
+    nginx.org/client-max-body-size: "600m"
+  name: new-corpsite-ingress
+  namespace: corpsite
+spec:
+  tls:
+    - hosts:
+        - new.actcorp.in
+      secretName: new-corpsite-ingress-tls
+  rules:
+  - host: new.actcorp.in
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: php-app-service
+            port:
+              number: 80
+
+			  
+			  
+4. kubectl apply -f new-corpsite-ingress.yaml
+
+5. kubectl describe ingress ebsales-api-ingress.yaml -n ebsales
+
+6.login to rdp and give host entry with worker node and try to login with the given URL
+ 

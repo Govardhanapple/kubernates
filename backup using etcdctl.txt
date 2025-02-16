@@ -1,0 +1,43 @@
+1. install the etcd-client
+
+apt install etcd-client
+
+2. run the below command
+
+sudo ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt snapshot save /opt/etcd-backup.db
+
+We can see status in the place of save we can add that
+
+To restore
+
+service kube-apiserver stop
+
+sudo ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt snapshot restore /opt/etcd-backup.db --data-dir /var/lib/etcd-from-backup
+
+After that we need to change the data-dir in configuration file
+ 
+
+
+--listen-client-urls=https://127.0.0.1:2379,https://192.5.86.6:2379
+https://192.5.86.6:2379
+
+
+
+-----------------------------------------------------------------------------------------
+
+kubectl get all --all-namespaces -o yaml > all-deploy-services.yaml
+
+
+-----------------------------------------------------------------------
+
+
+--data-directory = /var/lib/etcd
+
+
+
+
+
+
+
+
+

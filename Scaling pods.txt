@@ -1,0 +1,3 @@
+kubectl scale --replicas=3 deployment.apps/deploy-selfcare-popup -n selfcare
+
+We can scale down and scale up the number of pods with the above command

@@ -1,0 +1,6 @@
+kubectl create deployment nginx-deploy --image=nginx:1.16 --replicas=1
+
+
+To upgrade the deployment to version 1.17 using rolling update, you can use the following command:
+
+kubectl set image deployment/nginx-deploy nginx=nginx:1.17 --record=true
